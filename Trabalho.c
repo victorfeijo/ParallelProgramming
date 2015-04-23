@@ -31,9 +31,7 @@ void bubble_sort(int *v, int tam){
 
 int incrementar_contador() {
 
-    pthread_mutex_lock(&lock);
     contador++;
-    pthread_mutex_unlock(&lock);
 
     return contador - 1;
 }
@@ -41,7 +39,9 @@ int incrementar_contador() {
 void* thread(void *param) {
     bucket *p = (bucket *) param;
     while (1) {
+    	pthread_mutex_lock(&lock);
         int c = incrementar_contador();
+        pthread_mutex_unlock(&lock);
         if (c >= n_buckets)
             break;
         bubble_sort(p[c].values, p[c].tamanho);
