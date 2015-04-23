@@ -8,7 +8,6 @@ int contador = 0;
 pthread_mutex_t lock;
 
 typedef struct {
-  //int id;
   int *values;
   int tamanho;
 }bucket;
@@ -72,6 +71,7 @@ int main(int argc, char **argv) {
   bucket *balde = (bucket *) malloc(sizeof(bucket) * n_buckets);
   int minRange = 0;
   int maxRange = tamanho/n_buckets;
+  int resto = tamanho%n_buckets;
   int j;
   int qntElemBalde;
 
@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
 
       //alocando posição desnecessária (nao tem como o balde ter + que tamanho)
       balde[i].values = (int *) malloc(sizeof(int)*tamanho);
-      //balde[i].id = i;
       qntElemBalde = 0;
       for (j = 0; j<tamanho; j++) {
           if(vetor[j] >= minRange && vetor[j] <= maxRange) {
@@ -91,7 +90,13 @@ int main(int argc, char **argv) {
       balde[i].tamanho = qntElemBalde;
       printf("\nMinRange = %d\nMaxRange = %d\nTamanho = %d \n", minRange, maxRange,qntElemBalde);
       minRange = maxRange + 1;
-      maxRange = (tamanho/n_buckets)*(i+2);
+      //até o valor do resto ele coloca +1 no range do bucket
+      if (i < resto) {
+          maxRange = minRange + (tamanho/n_buckets);
+      }
+      else{
+      maxRange = minRange + (tamanho/n_buckets) - 1;
+      }
   }
 
   //-------------Criação e chamada das threads--------------------
