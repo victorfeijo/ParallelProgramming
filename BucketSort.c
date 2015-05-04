@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
 
   //-------------Criação e chamada das threads--------------------
 
+  pthread_mutex_init(&lock,NULL);
   pthread_t *threads = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
   for (i=0; i<n_threads; i++) {
       pthread_create(&threads[i], NULL, thread, (void *) balde);
@@ -120,7 +121,8 @@ int main(int argc, char **argv) {
       }
   }
 
-  free(threads);
+  pthread_mutex_destroy(&lock);
+  free(threa    ds);
   free(balde);
 
   return 0;
