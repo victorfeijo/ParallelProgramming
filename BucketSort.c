@@ -122,7 +122,7 @@ int main(int argc, char **argv) {
   }
 
   pthread_mutex_destroy(&lock);
-  free(threa    ds);
+  free(threads);
   free(balde);
 
   return 0;
