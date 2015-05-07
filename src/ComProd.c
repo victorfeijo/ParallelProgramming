@@ -22,9 +22,6 @@ void *Consumer (void *arg) {
         i = (i+1) % BUFFER_SIZE;
         buffer[i] = 0;
         printf ("Consuming the %d index\n", i);
-        // For iterate de buffer just one time and look if it's right
-        if (i == BUFFER_SIZE-1)
-            break;
         sem_post(&lock_cons);
         sem_post(&empty);
     }
@@ -37,9 +34,6 @@ void *Producer (void *arg) {
         f = (f+1) % BUFFER_SIZE;
         buffer[f] = f;
         printf("Producing the %d index\n", f);
-        // For iterate de buffer just one time and look if it's right
-        if (f == *BUFFER_SIZE-1)
-            break;
         sem_post(&lock_prod);
         sem_post(&full);
     }
