@@ -3,9 +3,6 @@
 #include <time.h>
 #include <mpi.h>
 
-int n_buckets;
-int contador = 0;
-
 typedef struct {
   int *values;
   int tamanho;
@@ -28,33 +25,10 @@ void bubble_sort(int *v, int tam){
   }
 }
 
-int incrementar_contador() {
-
-    contador++;
-
-    return contador - 1;
-}
-
-void* thread(void *param) {
-    bucket *p = (bucket *) param;
-    while (1) {
-    	pthread_mutex_lock(&lock);
-        int c = incrementar_contador();
-        pthread_mutex_unlock(&lock);
-        if (c >= n_buckets)
-            break;
-        bubble_sort(p[c].values, p[c].tamanho);
-        printf("Thread %d processando balde %d\n ", (int)pthread_self() , c);
-    }
-    pthread_exit(NULL);
-}
-
-
 int main(int argc, char **argv) {
 
   int tamanho = atoi(argv[1]);
-  int n_processo = atoi(argv[2]);
-  n_buckets = atoi(argv[3]);
+  int n_buckets = atoi(argv[2]);
 
   // ---------------Verifica se número Processos < 2 e número bucket < tamanho do vetor-------------
   if (n_processo < 2 || n_buckets < tamanho) {
@@ -104,18 +78,28 @@ int main(int argc, char **argv) {
       }
   }
 
-  //-------------Criação e chamada das threads--------------------
+  //-------------Criação e chamada dos processos--------------------
 
-  pthread_mutex_init(&lock,NULL);
-  pthread_t *threads = (pthread_t *) malloc(sizeof(pthread_t) * n_threads);
-  for (i=0; i<n_threads; i++) {
-      pthread_create(&threads[i], NULL, thread, (void *) balde);
+  int size, rank;
+  MPI_Status st;
+  MPI_Init(&argc, &argv);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  int rankEnvio = 1;
+
+  //-------------Possível?--------
+
+  if (rank == 0) {
+      for (i=0; i<n_buckets; i++) {
+          MPI_Send(&balde[i].values, 1, MPI_INT, rankEnvio, NULL, MPI_COMM_WORLD);
+          rankEnvio = (rankEnvio%size) + 1;
+      }
   }
-
-
-  for(i = 0; i < n_threads; i++)
-      pthread_join(threads[i], NULL);
-
+  else {
+      int buffer*;
+      MPI_Status st;
+      MPI_Recv(&buffer, 1, bucket, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &st);
+  }
   //------------Reordenação-------
   int cont = 0;
   for (i = 0; i<n_buckets; i++) {
@@ -126,7 +110,6 @@ int main(int argc, char **argv) {
       }
   }
 
-  pthread_mutex_destroy(&lock);
   free(threads);
   free(balde);
 
