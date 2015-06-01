@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   int rankEnvio = 1;
 
-  //-------------Melhor agora--------
+  //-------------Send and Receive--------
 
   if (rank == 0) {
       for (i=0; i<n_buckets; i++) {
