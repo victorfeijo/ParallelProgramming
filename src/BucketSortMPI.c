@@ -87,18 +87,19 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   int rankEnvio = 1;
 
-  //-------------Possível?--------
+  //-------------Melhor agora--------
 
   if (rank == 0) {
       for (i=0; i<n_buckets; i++) {
-          MPI_Send(&balde[i].values, 1, MPI_INT, rankEnvio, NULL, MPI_COMM_WORLD);
+          MPI_Send(i, 1, MPI_INT, rankEnvio, NULL, MPI_COMM_WORLD);
           rankEnvio = (rankEnvio%size) + 1;
       }
   }
   else {
-      int buffer*;
+      int indice;
       MPI_Status st;
-      MPI_Recv(&buffer, 1, bucket, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &st);
+      MPI_Recv(&indice, 1, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &st);
+      bubble_sort(balde[indice].values, balde[indice].tamanho);
   }
   //------------Reordenação-------
   int cont = 0;
