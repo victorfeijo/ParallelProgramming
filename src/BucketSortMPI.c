@@ -120,7 +120,15 @@ int main(int argc, char **argv) {
       for(i=1; i<size; i++) {
           MPI_Send(&buffer, 3, MPI_INT, i, 2, MPI_COMM_WORLD);
       }
-
+      //------------Reordenação-------
+      int cont = 0;
+      for (i = 0; i<n_buckets; i++) {
+          for (j = 0; j<balde[i].tamanho; j++) {
+            vetor[cont] = balde[i].values[j];
+            printf(" %d, ", vetor[cont]);
+            cont++;
+          }
+      }
   }
   else {
       //------Send and Receive--------------------------------------------------
@@ -154,15 +162,6 @@ int main(int argc, char **argv) {
       }
   }
   MPI_Finalize();
-  //------------Reordenação-------
-  int cont = 0;
-  for (i = 0; i<n_buckets; i++) {
-      for (j = 0; j<balde[i].tamanho; j++) {
-        vetor[cont] = balde[i].values[j];
-        printf(" %d, ", vetor[cont]);
-        cont++;
-      }
-  }
 
   free(vetor);
   free(balde);
