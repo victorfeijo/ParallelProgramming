@@ -88,7 +88,6 @@ int main(int argc, char **argv) {
   	  int rankEnvio;
   	  int buffer[3];
       buffer[2] = 0;
-      int buffer2[3];
       int *aux;
       for (i=0; i<n_buckets; i++) {
           //Recebe o rank do processo que está livre
@@ -108,14 +107,14 @@ int main(int argc, char **argv) {
           //------buffer[1]= id do balde ordenado pelo escravo------------------
           //------buffer[2]= rank do escravo que enviou o balde ordenado--------
 
-          MPI_Recv(&buffer2, 3, MPI_INT, MPI_ANY_SOURCE, 4, MPI_COMM_WORLD, &st);
-          printf("Recebendo balde ORDENADO %d do escravo %d \n", buffer2[1], buffer2[2]);
+          MPI_Recv(&buffer, 3, MPI_INT, MPI_ANY_SOURCE, 4, MPI_COMM_WORLD, &st);
+          printf("Recebendo balde ORDENADO %d do escravo %d \n", buffer[1], buffer[2]);
           //O mestre recebe o vetor ordenado, com os atributos do recebidor do
           //buffer--------------------------------------------------------------
           aux = malloc(sizeof(int)*buffer[0]);
-          MPI_Recv(aux, buffer2[0], MPI_INT, MPI_ANY_SOURCE, 5, MPI_COMM_WORLD, &st);
-          balde[buffer2[1]].tamanho = buffer2[0];
-          balde[buffer2[1]].values = aux;
+          MPI_Recv(aux, buffer[0], MPI_INT, MPI_ANY_SOURCE, 5, MPI_COMM_WORLD, &st);
+          balde[buffer[1]].tamanho = buffer[0];
+          balde[buffer[1]].values = aux;
       }
       buffer[2] = -1;
       for(i=1; i<size; i++) {
