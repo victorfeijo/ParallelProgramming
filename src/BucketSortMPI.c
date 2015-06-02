@@ -29,6 +29,13 @@ int main(int argc, char **argv) {
 
   int tamanho = atoi(argv[1]);
   int n_buckets = atoi(argv[2]);
+  int size, rank;
+  MPI_Status st;
+  MPI_Init(&argc, &argv);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+  if (rank == 0) {
 
   // ---------------Cria vetor original--------------------
   int i;
@@ -56,12 +63,12 @@ int main(int argc, char **argv) {
       for (j = 0; j<tamanho; j++) {
           if(vetor[j] >= minRange && vetor[j] <= maxRange) {
               balde[i].values[qntElemBalde] = vetor[j];
-              printf("balde[%d] = %d \n", i, balde[i].values[qntElemBalde]);
+              //printf("balde[%d] = %d \n", i, balde[i].values[qntElemBalde]);
               qntElemBalde++;
           }
       }
       balde[i].tamanho = qntElemBalde;
-      printf("\nMinRange = %d\nMaxRange = %d\nTamanho = %d \n", minRange, maxRange,qntElemBalde);
+     // printf("\nMinRange = %d\nMaxRange = %d\nTamanho = %d \n", minRange, maxRange,qntElemBalde);
       minRange = maxRange + 1;
       //até o valor do resto ele coloca +1 no range do bucket
       if (i < resto) {
@@ -72,15 +79,8 @@ int main(int argc, char **argv) {
       }
   }
 
-  //-------------Criação e chamada dos processos--------------------
+      //-------------Criação e chamada dos processos--------------------
 
-  int size, rank;
-  MPI_Status st;
-  MPI_Init(&argc, &argv);
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if (rank == 0) {
       //------Send and Receive--------
       //------buffer[0]=tamanhoBalde-------
       //------buffer[1]=idBucket-------
@@ -100,8 +100,6 @@ int main(int argc, char **argv) {
           MPI_Send(&buffer, 3, MPI_INT, rankEnvio, 2, MPI_COMM_WORLD);
           //Envia o vetor para ser ordenado pelos escravos
           MPI_Send(balde[i].values, balde[i].tamanho, MPI_INT, rankEnvio, 3, MPI_COMM_WORLD);
-
-
           //O mestre recebe o buffer que foi recebido anteriormente-------------
           //------buffer[0]=tamanho do balde ordenado pelo escravo--------------
           //------buffer[1]= id do balde ordenado pelo escravo------------------
@@ -120,7 +118,7 @@ int main(int argc, char **argv) {
       for(i=1; i<size; i++) {
           MPI_Send(&buffer, 3, MPI_INT, i, 2, MPI_COMM_WORLD);
       }
-      //------------Reordenação-------
+      //------------Reordenação-------------------------------------------------
       int cont = 0;
       for (i = 0; i<n_buckets; i++) {
           for (j = 0; j<balde[i].tamanho; j++) {
@@ -129,6 +127,9 @@ int main(int argc, char **argv) {
             cont++;
           }
       }
+  //---------------Liberando memória--------------------------------------------
+  free(vetor);
+  free(balde);
   }
   else {
       //------Send and Receive--------------------------------------------------
@@ -151,8 +152,8 @@ int main(int argc, char **argv) {
           //Recebe o vetor de tamanho buffer[0], armazenando na variável--------
           //valuesBalde---------------------------------------------------------
     	  MPI_Recv(valuesBalde, buffer[0], MPI_INT, 0, 3, MPI_COMM_WORLD, &st);
-    	  bubble_sort(valuesBalde, buffer[0]);
           printf("Ordenando bucket...\n");
+    	  bubble_sort(valuesBalde, buffer[0]);
           //Envia devolta o buffer para o mestre, com informaçoes do bucket já
           //ordenado e seta buffer[2] com o rank--------------------------------
           buffer[2] = rank;
@@ -162,9 +163,6 @@ int main(int argc, char **argv) {
       }
   }
   MPI_Finalize();
-
-  free(vetor);
-  free(balde);
 
   return 0;
 
