@@ -107,6 +107,7 @@ int main(int argc, char **argv) {
           //------buffer[0]=tamanho do balde ordenado pelo escravo--------------
           //------buffer[1]= id do balde ordenado pelo escravo------------------
           //------buffer[2]= rank do escravo que enviou o balde ordenado--------
+
           MPI_Recv(&buffer2, 3, MPI_INT, MPI_ANY_SOURCE, 4, MPI_COMM_WORLD, &st);
           printf("Recebendo balde ORDENADO %d do escravo %d \n", buffer2[1], buffer2[2]);
           //O mestre recebe o vetor ordenado, com os atributos do recebidor do
