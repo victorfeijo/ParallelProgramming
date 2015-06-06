@@ -11,6 +11,7 @@ typedef struct {
 
 void bubble_sort(int *v, int tam){
   int i,j,temp,trocou;
+  printf("Ordenando bucket...\n");
   for(j=0; j<tam-1; j++){
 	  trocou = 0;
 	  for(i = 0; i < tam -1; i++){
@@ -34,6 +35,12 @@ int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+  //----------Verifica se numero buckets é > que o tamanho do vetor--------
+  if (n_buckets > tamanho) {
+      printf("Número de buckets maior que o tamnho do vetor\n");
+      return 0;
+  }
 
   if (rank == 0) {
 
@@ -104,7 +111,6 @@ int main(int argc, char **argv) {
           //------buffer[0]=tamanho do balde ordenado pelo escravo--------------
           //------buffer[1]= id do balde ordenado pelo escravo------------------
           //------buffer[2]= rank do escravo que enviou o balde ordenado--------
-
           MPI_Recv(&buffer, 3, MPI_INT, MPI_ANY_SOURCE, 4, MPI_COMM_WORLD, &st);
           printf("Recebendo balde ORDENADO %d do escravo %d \n", buffer[1], buffer[2]);
           //O mestre recebe o vetor ordenado, com os atributos do recebidor do
@@ -152,7 +158,6 @@ int main(int argc, char **argv) {
           //Recebe o vetor de tamanho buffer[0], armazenando na variável--------
           //valuesBalde---------------------------------------------------------
     	  MPI_Recv(valuesBalde, buffer[0], MPI_INT, 0, 3, MPI_COMM_WORLD, &st);
-          printf("Ordenando bucket...\n");
     	  bubble_sort(valuesBalde, buffer[0]);
           //Envia devolta o buffer para o mestre, com informaçoes do bucket já
           //ordenado e seta buffer[2] com o rank--------------------------------
