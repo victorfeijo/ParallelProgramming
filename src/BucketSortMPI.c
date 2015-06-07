@@ -97,28 +97,31 @@ int main(int argc, char **argv) {
       buffer[2] = 0;
       int *aux;
       for (i=0; i<n_buckets; i++) {
-          //Recebe o rank do processo que está livre
-          MPI_Recv(&rankEnvio, 1, MPI_INT, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &st);
-          printf("Enviando balde %d para escravo %d\n", i, rankEnvio);
-          buffer[0] = balde[i].tamanho;
-          buffer[1] = i;
-          //Se já estiver no ultimo bucket, seta o buffer[2] que finalizou
-          //Envia primeiramente o Buffer, contendo o tamanho,id e finish
-          MPI_Send(&buffer, 3, MPI_INT, rankEnvio, 2, MPI_COMM_WORLD);
-          //Envia o vetor para ser ordenado pelos escravos
-          MPI_Send(balde[i].values, balde[i].tamanho, MPI_INT, rankEnvio, 3, MPI_COMM_WORLD);
-          //O mestre recebe o buffer que foi recebido anteriormente-------------
-          //------buffer[0]=tamanho do balde ordenado pelo escravo--------------
-          //------buffer[1]= id do balde ordenado pelo escravo------------------
-          //------buffer[2]= rank do escravo que enviou o balde ordenado--------
-          MPI_Recv(&buffer, 3, MPI_INT, MPI_ANY_SOURCE, 4, MPI_COMM_WORLD, &st);
-          printf("Recebendo balde ORDENADO %d do escravo %d \n", buffer[1], buffer[2]);
-          //O mestre recebe o vetor ordenado, com os atributos do recebidor do
-          //buffer--------------------------------------------------------------
-          aux = malloc(sizeof(int)*buffer[0]);
-          MPI_Recv(aux, buffer[0], MPI_INT, MPI_ANY_SOURCE, 5, MPI_COMM_WORLD, &st);
-          balde[buffer[1]].tamanho = buffer[0];
-          balde[buffer[1]].values = aux;
+          //Primeiro verifica se o balde tem tamanho > 1, se não tiver nao vale a pena enviar
+          if (balde[i].tamanho > 1) {
+              //Recebe o rank do processo que está livre
+              MPI_Recv(&rankEnvio, 1, MPI_INT, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &st);
+              printf("Enviando balde %d para escravo %d\n", i, rankEnvio);
+              buffer[0] = balde[i].tamanho;
+              buffer[1] = i;
+              //Se já estiver no ultimo bucket, seta o buffer[2] que finalizou
+              //Envia primeiramente o Buffer, contendo o tamanho,id e finish
+              MPI_Send(&buffer, 3, MPI_INT, rankEnvio, 2, MPI_COMM_WORLD);
+              //Envia o vetor para ser ordenado pelos escravos
+              MPI_Send(balde[i].values, balde[i].tamanho, MPI_INT, rankEnvio, 3, MPI_COMM_WORLD);
+              //O mestre recebe o buffer que foi recebido anteriormente-------------
+              //------buffer[0]=tamanho do balde ordenado pelo escravo--------------
+              //------buffer[1]= id do balde ordenado pelo escravo------------------
+              //------buffer[2]= rank do escravo que enviou o balde ordenado--------
+              MPI_Recv(&buffer, 3, MPI_INT, MPI_ANY_SOURCE, 4, MPI_COMM_WORLD, &st);
+              printf("Recebendo balde ORDENADO %d do escravo %d \n", buffer[1], buffer[2]);
+              //O mestre recebe o vetor ordenado, com os atributos do recebidor do
+              //buffer--------------------------------------------------------------
+              aux = malloc(sizeof(int)*buffer[0]);
+              MPI_Recv(aux, buffer[0], MPI_INT, MPI_ANY_SOURCE, 5, MPI_COMM_WORLD, &st);
+              balde[buffer[1]].tamanho = buffer[0];
+              balde[buffer[1]].values = aux;
+              }
       }
       buffer[2] = -1;
       for(i=1; i<size; i++) {
