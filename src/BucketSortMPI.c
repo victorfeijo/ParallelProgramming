@@ -37,8 +37,8 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   //----------Verifica se numero buckets é > que o tamanho do vetor--------
-  if (n_buckets > tamanho) {
-      printf("Número de buckets maior que o tamnho do vetor\n");
+  if (n_buckets > tamanho || size < 2) {
+      printf("Número de buckets maior que o tamnho do vetor ou número de processos menor que 2\n");
       return 0;
   }
 
